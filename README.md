@@ -1,6 +1,6 @@
 # azure-openai-vision-ui
 
-Simple Web UI to try out GPT-4 Turbo with Vision.
+Simple Web UI to try out vision capabilities on GPT-4o / GPT-4 Turbo.
 
 # Setup
 
@@ -27,7 +27,7 @@ You may upload multiple files.
 ![Usage 1](img/usage_1.png)
 
 Next, ask a question about the image,
-GPT-4 Turbo with Vision will then return a message.
+GPT-4o / GPT-4 Turbo will then return a message.
 
 ![Usage 2](img/usage_2.png)
 
