@@ -3,32 +3,40 @@ import httpx
 import os
 import streamlit as st
 
-from openai import AzureOpenAI
+from openai import AzureOpenAI, OpenAI
 
 
 def main():
-    azure_openai_deployment = os.environ.get(
-        "AZURE_OPENAI_DEPLOYMENT", "deploy1")
-    azure_openai_proxy = os.environ.get("AZURE_OPENAI_PROXY", "")
     http_client = None
+    openai_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "deploy1")
+    openai_proxy = os.environ.get("AZURE_OPENAI_PROXY", "")
+    openai_service = os.environ.get("AZURE_OPENAI_SERVICE", "")
 
-    if azure_openai_proxy:
-        http_client = httpx.Client(proxies={"https://": azure_openai_proxy})
+    if openai_proxy:
+        http_client = httpx.Client(proxies={"https://": openai_proxy})
 
-    azure_openai_client = AzureOpenAI(
-        azure_endpoint=f"https://{os.environ.get('AZURE_OPENAI_SERVICE', 'openai1')}.openai.azure.com",
+    if openai_service:
+        # If the environment variable AZURE_OPENAI_SERVICE is defined, use Azure OpenAI.
+        openai = AzureOpenAI(
+            azure_endpoint=f"https://{openai_service}.openai.azure.com",
 
-        # List of API versions
-        # GPT-4 Turbo with Vision requires an API version of 2023-12-01-preview or later
-        # https://learn.microsoft.com/en-US/azure/ai-services/openai/reference#chat-completions
-        api_version=os.environ.get(
-            "AZURE_OPENAI_API_VERSION", "2024-02-15-preview"),
+            # List of API versions
+            # GPT-4 Turbo with Vision requires an API version of 2023-12-01-preview or later
+            # https://learn.microsoft.com/en-US/azure/ai-services/openai/reference#chat-completions
+            api_version=os.environ.get(
+                "AZURE_OPENAI_API_VERSION", "2024-02-01"),
 
-        api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
-        http_client=http_client
-    )
+            api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
+            http_client=http_client
+        )
+    else:
+        # If the environment variable AZURE_OPENAI_SERVICE is not defined, use OpenAI.
+        openai = OpenAI(
+            api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
+            http_client=http_client
+        )
 
-    st.title("GPT-4 Turbo with Vision UI")
+    st.title("OpenAI Vision UI")
     files = st.file_uploader(
         "Please upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
 
@@ -95,8 +103,8 @@ def main():
         for message in st.session_state.messages[1:]:
             messages_with_images.append(message)
 
-        for response_chunk in azure_openai_client.chat.completions.create(
-            model=azure_openai_deployment,
+        for response_chunk in openai.chat.completions.create(
+            model=openai_deployment,
             messages=messages_with_images,
             max_tokens=4096,
             stream=True
