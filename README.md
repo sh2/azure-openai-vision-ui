@@ -2,23 +2,23 @@
 
 Simple Web UI to try out vision capabilities on GPT-4o / GPT-4 Turbo.
 
-# Setup
+## Setup
 
 An example of the setup procedure is shown below.
 
-```
-$ git clone https://github.com/sh2/azure-openai-vision-ui.git
-$ cd azure-openai-vision-ui/src
-$ python3 -m venv .venv
-$ source .venv/bin/activate
-$ pip install -r requirements.txt
-$ cd ..
-$ cp template_script.sh script.sh
-$ vim script.sh
-$ ./script.sh
+```bash
+git clone https://github.com/sh2/azure-openai-vision-ui.git
+cd azure-openai-vision-ui/src
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cd ..
+cp template_script.sh script.sh
+vim script.sh
+./script.sh
 ```
 
-# Usage
+## Usage
 
 First, upload your image files.
 The format is JPEG or PNG, and each file can be up to 20 MB.
