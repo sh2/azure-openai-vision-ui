@@ -4,6 +4,7 @@ import os
 import streamlit as st
 
 from openai import AzureOpenAI, OpenAI
+from st_img_pastebutton import paste as paste_image
 
 
 def main():
@@ -37,17 +38,27 @@ def main():
         )
 
     st.title("OpenAI Vision UI")
-    files = st.file_uploader(
-        "Please upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
 
-    if files:
-        # Display image files in two columns
-        columns = st.columns(2)
-        column_index = 0
+    upload_method = st.radio("Select upload method", [
+                             "Upload image files", "Paste from Clipboard"])
 
-        for file in files:
-            columns[column_index].image(file)
-            column_index = (column_index + 1) % 2
+    if upload_method == "Upload image files":
+        files = st.file_uploader(
+            "Upload image files", accept_multiple_files=True, type=["jpeg", "jpg", "png"])
+
+        if files:
+            # Display image files in two columns
+            columns = st.columns(2)
+            column_index = 0
+
+            for file in files:
+                columns[column_index].image(file)
+                column_index = (column_index + 1) % 2
+    else:
+        pasted_image = paste_image("Paste from Clipboard")
+
+        if pasted_image:
+            st.image(pasted_image)
 
     clear = st.button("Clear Chat History")
 
@@ -85,18 +96,25 @@ def main():
         })
 
         # Attach images to the first message
-        if files:
-            for file in files:
-                image_base64 = base64.b64encode(
-                    file.getvalue()).decode("utf-8")
-                file_type = "jpeg"
+        if upload_method == "Upload image files":
+            if files:
+                for file in files:
+                    image_base64 = base64.b64encode(
+                        file.getvalue()).decode("utf-8")
+                    file_type = "jpeg"
 
-                if file.getvalue().startswith(b"\x89PNG"):
-                    file_type = "png"
+                    if file.getvalue().startswith(b"\x89PNG"):
+                        file_type = "png"
 
+                    messages_with_images[0]["content"].append({
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/{file_type};base64,{image_base64}"}
+                    })
+        else:
+            if pasted_image:
                 messages_with_images[0]["content"].append({
                     "type": "image_url",
-                    "image_url": {"url": f"data:image/{file_type};base64,{image_base64}"}
+                    "image_url": {"url": pasted_image}
                 })
 
         # Add the second and subsequent messages as they are
